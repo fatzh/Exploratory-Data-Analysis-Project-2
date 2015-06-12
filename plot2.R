@@ -7,9 +7,6 @@
 
 library(dplyr)
 
-## avoid printing exp.. just for clarity
-options(scipen=999)
-
 ##
 ## load data, assumes the data is present in the working directory
 ##
@@ -17,7 +14,6 @@ reload <- FALSE
 
 if (reload) {
     NEI <- readRDS("summarySCC_PM25.rds")
-    SCC <- readRDS("Source_Classification_Code.rds")
 }
 
 ## filter on Baltimore and extract yearly sums

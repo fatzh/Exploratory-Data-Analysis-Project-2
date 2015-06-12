@@ -20,17 +20,23 @@ if (reload) {
     SCC <- readRDS("Source_Classification_Code.rds")
 }
 
-## join with SCC table, and filter for only Coal related emissions. Then group by year and sum.
+## extract the Coal related sources. I assume that a refernce to the
+## word "coal" in the source name.
+l <- grep("coal", SCC$Short.Name, ignore.case = TRUE)
+subset_SCC <- SCC[l,]
+
+## filter for sources related to Coal emissions.
+## Then group by year 
+## and sum.
 d <- NEI %>%
-    left_join(SCC, by="SCC") %>%
-    filter(grepl("Coal", EI.Sector)) %>%
+    filter(SCC %in% subset_SCC$SCC) %>%
     group_by(year) %>%
     summarise(sum(Emissions))
 
 ## rename cols
 colnames(d) <- c('year', 'emissions')
 
-## use year and type as factor
+## use year as factor
 d$year <- as.factor(d$year)
 
 ## write output in a PNG file
