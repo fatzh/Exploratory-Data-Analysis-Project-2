@@ -7,6 +7,9 @@
 
 library(dplyr)
 
+## avoid printing exp.. just for clarity
+options(scipen=999)
+
 ##
 ## load data, assumes the data is present in the working directory
 ##
