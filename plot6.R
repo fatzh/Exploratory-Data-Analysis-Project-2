@@ -1,8 +1,10 @@
 ##
-## plot 5
+## plot 6
 ##
-## How have emissions from motor vehicle sources changed from 1999-2008 
-## in Baltimore City
+## Compare emissions from motor vehicle sources in Baltimore City
+## with emissions from motor vehicle sources in Los Angeles County, California
+## (fips == 06037). Which city has seen greater changes over time in
+## motor vehicle emissions?
 ##
 
 library(dplyr)
@@ -26,36 +28,42 @@ if (reload) {
 l <- grepl("vehicle", SCC$Short.Name, ignore.case = TRUE)
 subset_SCC <- SCC[l,]
 
-## filter for baltimore,
-## then for sources related to vehicles.
-## Then group by year 
-## and sum.
-d <- NEI %>%
-  filter(fips == '24510' | fips == '06037') %>% 
-  filter(SCC %in% subset_SCC$SCC) %>%
-  group_by(year, fips) %>%
-  summarise(sum(Emissions))
 
-## rename cols
-colnames(d) <- c('year', 'fips', 'emissions')
+d <- NEI %>%
+  ## filter for baltimore and calfornia,
+  filter(fips == '24510' | fips == '06037') %>% 
+  ## then filter for sources related to vehicles.
+  filter(SCC %in% subset_SCC$SCC) %>%
+  ## Then group by year and place (fips)
+  group_by(year, fips) %>%
+  ## and sum.
+  summarise(emissions = sum(Emissions)) %>%
+  ## then group by location
+  group_by(fips) %>% 
+  ## and calculate % change for each location
+  mutate(emissions = (emissions/max(emissions)) * 100)
 
 ## use year and fips as factor
 d$year <- as.factor(d$year)
 d$fips <- as.factor(d$fips)
 
+## make fips human readable
+levels(d$fips) <- c("Los Angeles", "Baltimore")
+  
 ## write output in a PNG file
-#png(filename="./plot6.png")
+png(filename="./plot6.png")
 
 ## and plot
 print(
-  ggplot(d, aes(x=year, y=emissions)) 
-      + geom_bar(stat='identity') 
-      + ylab('Emissions (tons)') 
+  ggplot(d, aes(x=year, y=emissions, group=fips, colour=fips)) 
+      + geom_line()
+      + geom_point()
+      + ylab('Emissions (%)') 
       + xlab('Year')
-      + ggtitle("Baltimore Total PM2.5 Emissions per year (Vehicles)")
-      + facet_wrap(~ fips)
+      + scale_y_continuous(breaks = seq(0,100,by = 10))
+      + ggtitle("Change in PM2.5 Emissions in % per year (Vehicles)")
 )
 
 
 ## close PNG file
-#dev.off()
+dev.off()
