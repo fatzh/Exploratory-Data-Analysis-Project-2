@@ -16,7 +16,7 @@ options(scipen=999)
 ##
 ## load data, assumes the data is present in the working directory
 ##
-reload <- FALSE
+reload <- TRUE
 
 if (reload) {
   NEI <- readRDS("summarySCC_PM25.rds")
@@ -41,7 +41,7 @@ d <- NEI %>%
   ## then group by location
   group_by(fips) %>% 
   ## and calculate % change for each location
-  mutate(emissions = (emissions/max(emissions)) * 100)
+  mutate(emissions = (emissions/first(emissions)) * 100)
 
 ## use year and fips as factor
 d$year <- as.factor(d$year)
@@ -61,7 +61,7 @@ print(
       + ylab('Emissions (%)') 
       + xlab('Year')
       + scale_y_continuous(breaks = seq(0,100,by = 10))
-      + ggtitle("Change in PM2.5 Emissions in % per year (Vehicles)")
+      + ggtitle("Change in PM2.5 Emissions in % (Vehicles)")
 )
 
 

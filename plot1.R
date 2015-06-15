@@ -11,17 +11,16 @@ library(dplyr)
 ##
 ## load data, assumes the data is present in the working directory
 ##
-reload <- FALSE
+reload <- TRUE
 
 if (reload) {
     NEI <- readRDS("summarySCC_PM25.rds")
 }
 
 ## extract yearly sums
-d <- NEI %>% group_by(year) %>% summarise(sum(Emissions))
-
-## rename cols
-colnames(d) <- c('year', 'emissions')
+d <- NEI %>%
+    group_by(year) %>%
+    summarise(emissions = sum(Emissions))
 
 ## write output in a PNG file
 png(filename="./plot1.png")

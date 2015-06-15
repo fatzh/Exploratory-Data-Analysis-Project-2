@@ -10,17 +10,17 @@ library(dplyr)
 ##
 ## load data, assumes the data is present in the working directory
 ##
-reload <- FALSE
+reload <- TRUE
 
 if (reload) {
     NEI <- readRDS("summarySCC_PM25.rds")
 }
 
 ## filter on Baltimore and extract yearly sums
-d <- NEI %>% filter(fips == '24510') %>% group_by(year) %>% summarise(sum(Emissions))
-
-## rename cols
-colnames(d) <- c('year', 'emissions')
+d <- NEI %>%
+    filter(fips == '24510') %>%
+    group_by(year) %>%
+    summarise(emissions = sum(Emissions))
 
 ## write output in a PNG file
 png(filename="./plot2.png")

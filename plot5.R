@@ -14,7 +14,7 @@ options(scipen=999)
 ##
 ## load data, assumes the data is present in the working directory
 ##
-reload <- FALSE
+reload <- TRUE
 
 if (reload) {
   NEI <- readRDS("summarySCC_PM25.rds")
@@ -34,10 +34,7 @@ d <- NEI %>%
   filter(fips == '24510') %>% 
   filter(SCC %in% subset_SCC$SCC) %>%
   group_by(year) %>%
-  summarise(sum(Emissions))
-
-## rename cols
-colnames(d) <- c('year', 'emissions')
+  summarise(emissions = sum(Emissions))
 
 ## use year as factor
 d$year <- as.factor(d$year)

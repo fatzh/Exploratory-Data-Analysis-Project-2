@@ -12,7 +12,7 @@ library(ggplot2)
 ##
 ## load data, assumes the data is present in the working directory
 ##
-reload <- FALSE
+reload <- TRUE
 
 if (reload) {
     NEI <- readRDS("summarySCC_PM25.rds")
@@ -22,10 +22,11 @@ if (reload) {
 d <- NEI %>% 
     filter(fips == '24510') %>% 
     group_by(year, type) %>%
-    summarise(sum(Emissions))
-
-## rename cols
-colnames(d) <- c('year', 'type', 'emissions')
+    summarise(emissions = sum(Emissions)) %>%
+    ## then group by source type
+    group_by(type) %>% 
+    ## and calculate % change for each source type
+    mutate(emissions = (emissions/first(emissions)) * 100)
 
 ## use year and type as factor
 d$year <- as.factor(d$year)
@@ -36,11 +37,12 @@ png(filename="./plot3.png")
 
 ## and plot
 print(
-  ggplot(d, aes(x=year, y=emissions)) + geom_bar(stat='identity')
-      + ylab('Emissions (tons)') 
+  ggplot(d, aes(x=year, y=emissions, group=type, colour=type)) 
+      + geom_line()
+      + geom_point()
+      + ylab('Emissions (%)') 
       + xlab('Year')
-      + ggtitle("Total PM2.5 Emissions per year per source type in Baltimore")
-      + facet_wrap(~ type)
+      + ggtitle("Change in PM2.5 Emissions per year per source type in Baltimore")
 )
      
 
